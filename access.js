@@ -11,9 +11,9 @@ const modulesInfo=[
   ['team','People','Team accounts and access control.','Administrators create and manage employee accounts, update employment details and reset passwords.']
 ];
 function moduleInfo(i){const [ic,title,,description]=modulesInfo[i];modal(`<div class="dialog-icon">${icon(ic,22)}</div><div class="meta violet">WORKSPACE MODULE / 0${i+1}</div><h2>${title}</h2><p>${description}</p><div class="modal-actions"><button class="btn btn-primary" onclick="closeModal()">Back to portal</button></div>`)}
-function accessScreen(){const admin=accessRole==='Admin';return `<div class="access">
+function accessScreen(){const admin=accessRole==='Admin';return `<div class="access" data-section="portal">
 <header class="access-header"><div class="limit topline"><div class="identity">${brand()}<span class="product-tag">Workforce OS</span></div><button class="help-button" type="button" onclick="accessHelp()">${icon('help',16)} Help center ${icon('arrowUpRight',13)}</button></div></header>
-<main class="limit access-main"><div class="access-grid">
+<main class="limit access-main" id="access-portal"><div class="access-grid">
 <section class="cover" aria-labelledby="cover-heading"><img class="cover-photo" src="/assets/workspace-architecture.jpg" alt="" fetchpriority="high"><div class="cover-top"><span class="cover-tag meta"><i></i> WORKSPACE EDITION</span><span class="corner-plus" aria-hidden="true">+</span></div>
 <div class="cover-copy"><div class="cover-eyebrow meta">01 <span></span> THE WORKFORCE PORTAL</div><h1 id="cover-heading">Your work,<br><em>in focus.</em></h1><p>People, attendance and payroll.<br>One connected workspace.</p></div>
 <div class="cover-foot meta"><span>${pulseMark} TLB3 SYSTEMS</span><span>FIG. 001 / OPERATIONS</span></div></section>
@@ -22,5 +22,11 @@ function accessScreen(){const admin=accessRole==='Admin';return `<div class="acc
 <form id="loginForm"><label for="loginId">Email or ${admin?'admin':'user'} ID</label><div class="entry">${icon('profile',17)}<input id="loginId" name="username" autocomplete="username" autocapitalize="none" placeholder="Enter your email or ID" required></div>
 <div class="label-line"><label for="loginPass">Password</label><button type="button" onclick="accessHelp()">Forgot password?</button></div><div class="entry">${icon('lock',17)}<input id="loginPass" name="password" type="password" autocomplete="current-password" placeholder="Enter your password" required><button type="button" aria-label="Show password" aria-pressed="false" onclick="showPassword(this)">${eye}</button></div>
 <div class="error" role="alert" id="loginError"></div><button class="sign-btn" type="submit">Sign in to workspace <span aria-hidden="true">→</span></button></form><div class="secure-note">${icon('shield',14)} Protected by role-based authentication</div></section></div>
-<section class="module-section" aria-labelledby="directory-title"><div class="section-title"><h2 id="directory-title">Workspace modules</h2><span class="meta">DIRECTORY / 03</span></div><div class="modules">${modulesInfo.map(([ic,title,desc],i)=>`<button class="module" type="button" onclick="moduleInfo(${i})"><span class="module-icon">${icon(ic,21)}</span><span class="module-text"><small class="meta">MODULE 0${i+1}</small><strong>${title}</strong><span>${desc}</span></span><span class="module-arrow">${icon('arrowUpRight',15)}</span></button>`).join('')}</div></section></main>
-<footer class="limit access-footer"><span>© ${new Date().getFullYear()} TLB3 Pulse</span><span class="footer-system meta"><i></i> WORKFORCE OPERATING SYSTEM</span></footer></div>`}
+<section id="access-modules" class="module-section" aria-labelledby="directory-title"><div class="section-title"><h2 id="directory-title">Workspace modules</h2><span class="meta">DIRECTORY / 03</span></div><div class="modules">${modulesInfo.map(([ic,title,desc],i)=>`<button class="module" type="button" onclick="moduleInfo(${i})"><span class="module-icon">${icon(ic,21)}</span><span class="module-text"><small class="meta">MODULE 0${i+1}</small><strong>${title}</strong><span>${desc}</span></span><span class="module-arrow">${icon('arrowUpRight',15)}</span></button>`).join('')}</div></section></main>
+<footer class="limit access-footer"><span>© ${new Date().getFullYear()} TLB3 Pulse</span><span class="footer-system meta"><i></i> WORKFORCE OPERATING SYSTEM</span></footer><nav class="guest-dock" aria-label="Portal navigation"><button type="button" data-jump="portal" aria-current="location" onclick="portalJump('portal')">${icon('overview',18)}Portal</button><button type="button" data-jump="modules" onclick="portalJump('modules')">${icon('fileText',18)}Modules</button><button type="button" onclick="accessHelp()">${icon('help',18)}Help</button></nav></div>`}
+function portalJump(section){
+  const root=document.querySelector('.access');
+  root.dataset.section=section;
+  root.querySelectorAll('[data-jump]').forEach(button=>{if(button.dataset.jump===section)button.setAttribute('aria-current','location');else button.removeAttribute('aria-current')});
+  window.scrollTo(0,0);
+}
