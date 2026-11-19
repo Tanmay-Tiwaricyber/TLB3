@@ -6,3 +6,123 @@
 .sign-btn{width:100%}
 @media(max-width:920px){.access-grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px}.limit{width:94%}.module{padding:13px;gap:10px}.cover{min-height:460px}.access-panel{padding:24px}.module-arrow{display:none}}
 @media(max-width:700px){.limit{width:calc(100% - 32px)}.topline{height:60px}.product-tag{display:none}.help-button{min-height:44px}.access-grid{grid-template-columns:minmax(0,1fr);gap:14px}.access-main{padding-top:16px}.cover{min-height:190px;padding:17px 20px}.cover-copy{padding:15px 0 0}.cover h1{font-size:clamp(40px,10.5vw,63px);margin:0 0 8px}.cover h1 br{display:none}.cover em{margin-left:.12em}.cover-eyebrow,.cover-foot{display:none}.cover-copy p{font-size:13px}.cover-photo{object-position:50% 43%}.access-panel{padding:24px 20px}.role-switch button{min-height:44px}.entry input,.field input,.field select{font-size:16px}.modules{grid-template-columns:1fr;gap:8px}.module{padding:14px 16px}.module-arrow{display:block;align-self:center}.access-footer{gap:12px;flex-wrap:wrap}.calendar .day{overflow:hidden}.calendar .tag{max-width:100%;font-size:9px;position:static;display:block;overflow:hidden;text-overflow:ellipsis}.page-heading{flex-wrap:wrap}.modal-actions{flex-wrap:wrap}.content[data-page=payroll][data-role=employee] .payroll-table td:nth-child(3){display:flex}}
+
+/* Shared dashboard components. Use the workspace palette in either theme. */
+.shell {
+  --module-tint: color-mix(in srgb, #8b77ef 14%, var(--surface));
+  --module-ink: color-mix(in srgb, #8068df 63%, var(--ink));
+}
+.shell .stat-icon, .shell .profile-security-icon, .shell .profile-summary-icon {
+  flex: none;
+  background: var(--module-tint);
+  color: var(--module-ink);
+}
+.shell .stat-num, .shell .report-card .big { font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.shell .subtle-link, .shell .profile-help button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-height: 32px;
+  color: var(--module-ink);
+  font-weight: 550;
+}
+.shell .subtle-link:hover, .shell .profile-help button:hover { text-decoration: underline; }
+.shell .card-head { flex-wrap: wrap; }
+.shell .office-name, .shell .profile-field strong > .lucide-icon { display: inline-flex; vertical-align: middle; }
+.shell .tag.unrecorded { color: var(--muted); background: var(--surface-2); }
+
+/* Admin register, shortcuts and reports */
+.register-date input {
+  min-width: 0;
+  max-width: 100%;
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--ink);
+  font: 13px var(--mono);
+}
+.quick-actions { gap: 6px; }
+.quick-actions .activity-item {
+  position: relative;
+  align-items: center;
+  padding: 11px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+}
+.quick-actions .activity-item:hover, .quick-actions .activity-item:focus-within { background: var(--module-tint); }
+.quick-actions .activity-bullet { color: var(--module-ink); background: var(--module-tint); }
+.quick-actions strong { font-size: 13px; }
+.quick-actions a::after { content: ''; position: absolute; inset: 0; border-radius: inherit; }
+.quick-actions .activity-item::after { content: '›'; margin-left: auto; color: var(--muted); font-size: 18px; }
+.shell .chart-bars {
+  margin: 12px 0 26px;
+  gap: clamp(2px, .5vw, 8px);
+  border-bottom: 1px solid var(--line);
+  background: repeating-linear-gradient(to top, transparent 0 calc(25% - 1px), var(--line) calc(25% - 1px) 25%);
+}
+.shell .chart-bar { min-width: 0; border-radius: 4px 4px 0 0; background: var(--module-tint); color: var(--module-ink); }
+.shell .chart-bar:last-child { background: var(--module-ink); color: var(--surface); }
+.shell .chart-bar span { font: 10px var(--mono); bottom: -18px; }
+.shell .dept-label { width: auto; overflow-wrap: anywhere; }
+
+/* Employee summary, check-in and profile panels */
+.salary-highlight {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+  background: var(--module-tint);
+}
+.salary-highlight small { display: block; color: var(--ink-2); }
+.salary-highlight strong { display: block; font-size: clamp(22px, 2vw, 30px); letter-spacing: -.04em; overflow-wrap: anywhere; }
+.salary-highlight .round-icon { background: var(--surface); color: var(--module-ink); flex: none; }
+.attendance-hero .location-dot {
+  width: 26px;
+  height: 26px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  background: #d9ff571c;
+  color: #d9ff87;
+}
+.attendance-hero .btn-mint { background: #d9ff87; color: #182411; }
+.attendance-hero .btn:disabled { cursor: default; transform: none; }
+.profile-chip i { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--good); margin-right: 4px; }
+.profile-summary .profile-link { margin-top: 12px; }
+.profile-summary-row strong { text-align: right; }
+.profile-field, .profile-summary-row strong { min-width: 0; overflow-wrap: anywhere; }
+.security-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+.security-note svg { margin-top: 3px; }
+.profile-help { display: grid; justify-items: start; padding: 2px 4px; }
+.profile-help button { padding: 0; border: 0; background: transparent; text-align: left; }
+
+/* Intermediate widths otherwise squeeze two content columns beside the sidebar. */
+@media (min-width: 701px) and (max-width: 980px) {
+  .shell .main-grid, .shell .profile-layout { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 700px) {
+  .shell .toolbar > * { min-width: 0; }
+  .shell .toolbar .search { max-width: none; flex: 1 0 100%; }
+  .shell .register-date, .shell .toolbar .select-small { flex: 1 1 124px; margin-left: 0; }
+  .register-date input { width: 100%; font-size: 16px; }
+  .shell .subtle-link, .shell .profile-help button, .shell .icon-btn { min-height: 44px; }
+  .shell .icon-btn { min-width: 44px; display: grid; place-items: center; }
+  .profile-hero { flex-wrap: wrap; }
+  .profile-hero-right { flex: 1 0 100%; border-top: 1px solid var(--line); padding-top: 12px; text-align: left; }
+  .shell .chart-bars { height: 145px; }
+}
