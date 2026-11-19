@@ -1,0 +1,8 @@
+{
+  "name": "tlb3-pulse-admin-bootstrap",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "firebase-admin": "^13.0.0"
+  }
+}

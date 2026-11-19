@@ -1,0 +1,41 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "users": {
+      ".read": "auth != null && (auth.token.admin === true && auth.token.email === 'admin@example.com')",
+      ".indexOn": [
+        "employeeId"
+      ],
+      "$uid": {
+        ".read": "auth != null && (auth.uid === $uid || (auth.token.admin === true && auth.token.email === 'admin@example.com'))",
+        ".write": false
+      }
+    },
+    "attendance": {
+      ".read": "auth != null && (auth.token.admin === true && auth.token.email === 'admin@example.com')",
+      "$employeeId": {
+        ".read": "auth != null && ((auth.token.admin === true && auth.token.email === 'admin@example.com') || root.child('users').child(auth.uid).child('employeeId').val() === $employeeId)",
+        ".write": false,
+        "$date": {
+          ".read": "auth != null && ((auth.token.admin === true && auth.token.email === 'admin@example.com') || root.child('users').child(auth.uid).child('employeeId').val() === $employeeId)",
+          ".write": false
+        }
+      }
+    },
+    "payments": {
+      ".read": "auth != null && (auth.token.admin === true && auth.token.email === 'admin@example.com')",
+      "$employeeId": {
+        ".read": "auth != null && ((auth.token.admin === true && auth.token.email === 'admin@example.com') || root.child('users').child(auth.uid).child('employeeId').val() === $employeeId)",
+        ".write": false
+      }
+    },
+    "settings": {
+      "office": {
+        ".read": "auth != null",
+        ".write": "auth != null && auth.token.admin === true && auth.token.email === 'admin@example.com'",
+        ".validate": "newData.hasChildren(['name','lat','lng','radius','updatedAt','updatedBy']) && newData.child('name').isString() && newData.child('name').val().length > 0 && newData.child('name').val().length <= 120 && newData.child('lat').isNumber() && newData.child('lat').val() >= -90 && newData.child('lat').val() <= 90 && newData.child('lng').isNumber() && newData.child('lng').val() >= -180 && newData.child('lng').val() <= 180 && newData.child('radius').isNumber() && newData.child('radius').val() >= 10 && newData.child('radius').val() <= 5000 && newData.child('updatedAt').isNumber() && newData.child('updatedBy').val() === auth.uid"
+      }
+    }
+  }
+}
