@@ -43,3 +43,24 @@ The web client targets Firebase project **chat-world-62138**. Its supplied publi
 Profiles (`/users/{uid}`), daily attendance (`/attendance/{employeeId}/{date}`), credits (`/payments/{employeeId}/{paymentId}`) and office policy (`/settings/office`) live in Realtime Database. Passwords stay in Firebase Authentication. The portal switch is presentation only: trusted writes require callable authorization or RTDB rules. Admin operations require a provisioned admin claim **and** the reserved admin email.
 
 Run `node --test scripts/attendance.test.cjs` to check the attendance handlers against an in-memory database stub. Production verification requires deployed rules, Functions and authorized employee/admin accounts.
+
+## If Team → Create account reports a CORS or internal error
+
+The browser calls the **Firebase Functions** endpoint directly. Adding CORS headers to the frontend, or changing RTDB rules or Firebase Auth authorized domains, does not fix a missing callable. A Google 404 page from `us-central1-chat-world-62138.cloudfunctions.net/createEmployee` means the request is not reaching this handler.
+
+From an authenticated terminal with Firebase deployment permissions, run:
+
+```sh
+npm ci --prefix functions
+firebase deploy --project chat-world-62138 --only functions
+node scripts/check-callable.mjs
+```
+
+The check uses the production portal Origin and no credentials. It expects an OPTIONS response allowing POST, Authorization and Content-Type, followed by a readable `401 UNAUTHENTICATED` for an unsigned callable POST. It cannot create a worker. After it passes, verify account creation with your provisioned admin. Publish the updated web client separately for the mobile metadata and form fixes.
+
+- **OPTIONS 404:** Check `firebase functions:list --project chat-world-62138`. Confirm `createEmployee` is deployed in `us-central1` and resolve any deployment errors (including billing or service-account permission failures).
+- **OPTIONS 403 from Google, not callable JSON:** Check the function’s Cloud Run ingress and invoker policy. Browser-facing callable services must accept unauthenticated HTTP preflights; the callable still authenticates the subsequent POST with a Firebase ID token. Do not loosen database rules or grant public access to scheduler services.
+- **Signed POST returns callable `PERMISSION_DENIED`:** Transport is working. Check the account's admin claim and reserved email, then sign in again to refresh the token.
+- **Another custom/preview domain:** Set `WORKSPACE_EXTRA_ORIGINS` in `functions/.env.chat-world-62138` to an exact, comma-separated list of trusted origins (scheme and hostname, no trailing slash), then redeploy Functions. The production portal, default Firebase Hosting domains, and localhost are already supported.
+
+Local regression check: `npm ci --prefix functions && node --test scripts/*.test.*`. The HTTP test uses the actual Firebase callable middleware on localhost.

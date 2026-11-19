@@ -10,6 +10,17 @@ const auth = admin.auth();
 const APP_DOMAIN = 'tlb3pulse.com';
 const ADMIN_EMAIL = 'admin@example.com';
 
+// onCall handles OPTIONS before Firebase authentication. Origin access never
+// grants API permissions: every handler below still requires a verified user.
+const browserOrigins = [
+  'https://tlb3-pulse.vercel.app',
+  'https://chat-world-62138.web.app',
+  'https://chat-world-62138.firebaseapp.com',
+  /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/,
+  ...(process.env.WORKSPACE_EXTRA_ORIGINS || '').split(',').map(s => s.trim()).filter(Boolean),
+];
+const browserCallable = handler => onCall({ cors: browserOrigins }, handler);
+
 const fail = (code, message) => { throw new HttpsError(code, message); };
 const cleanId = value => String(value || '').trim().toUpperCase();
 const validId = value => /^[A-Z0-9_-]{3,24}$/.test(value);
@@ -52,7 +63,7 @@ function distanceMeters(lat1, lon1, lat2, lon2) {
   return 6371000 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
-exports.createEmployee = onCall(async request => {
+exports.createEmployee = browserCallable(async request => {
   requireAdmin(request);
   const d = request.data || {};
   const employeeId = cleanId(d.employeeId);
@@ -82,7 +93,7 @@ exports.createEmployee = onCall(async request => {
   }
 });
 
-exports.updateEmployee = onCall(async request => {
+exports.updateEmployee = browserCallable(async request => {
   const adminUser = requireAdmin(request);
   const d = request.data || {};
   const { uid } = await findEmployee(d.employeeId);
@@ -99,7 +110,7 @@ exports.updateEmployee = onCall(async request => {
   return { ok: true };
 });
 
-exports.setEmployeePassword = onCall(async request => {
+exports.setEmployeePassword = browserCallable(async request => {
   requireAdmin(request);
   const password = String(request.data?.password || '');
   if (password.length < 8 || password.length > 128) fail('invalid-argument', 'Password must be at least 8 characters.');
@@ -109,7 +120,7 @@ exports.setEmployeePassword = onCall(async request => {
   return { ok: true };
 });
 
-exports.setEmployeeActive = onCall(async request => {
+exports.setEmployeeActive = browserCallable(async request => {
   requireAdmin(request);
   const { uid } = await findEmployee(request.data?.employeeId);
   const active = request.data?.active === true;
@@ -118,7 +129,7 @@ exports.setEmployeeActive = onCall(async request => {
   return { ok: true, active };
 });
 
-exports.updateMyProfile = onCall(async request => {
+exports.updateMyProfile = browserCallable(async request => {
   const user = requireAuth(request);
   const d = request.data || {};
   const updates = { updatedAt: Date.now() };
@@ -134,7 +145,7 @@ exports.updateMyProfile = onCall(async request => {
   return { ok: true };
 });
 
-exports.markAttendance = onCall(async request => {
+exports.markAttendance = browserCallable(async request => {
   const user = requireAuth(request);
   const profileSnap = await db.ref(`users/${user.uid}`).once('value');
   const profile = profileSnap.val();
@@ -156,7 +167,7 @@ exports.markAttendance = onCall(async request => {
   return { ok: true, date, distanceMeters: distance };
 });
 
-exports.adjustAttendance = onCall(async request => {
+exports.adjustAttendance = browserCallable(async request => {
   const adminUser = requireAdmin(request);
   const d = request.data || {}, employeeId = cleanId(d.employeeId), date = String(d.date || '');
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) fail('invalid-argument', 'Attendance date is invalid.');
@@ -168,7 +179,7 @@ exports.adjustAttendance = onCall(async request => {
   return { ok: true };
 });
 
-exports.recordSalaryCredit = onCall(async request => {
+exports.recordSalaryCredit = browserCallable(async request => {
   requireAdmin(request);
   const d = request.data || {}, employeeId = cleanId(d.employeeId), amount = Number(d.amount), creditDate = String(d.creditDate || '');
   const { profile } = await findEmployee(employeeId);
@@ -180,7 +191,7 @@ exports.recordSalaryCredit = onCall(async request => {
   return { paymentId: paymentRef.key };
 });
 
-exports.updateOfficeSettings = onCall(async request => {
+exports.updateOfficeSettings = browserCallable(async request => {
   requireAdmin(request);
   const d = request.data || {}, name = requiredString(d.name, 'Office name');
   const lat = Number(d.lat), lng = Number(d.lng), radius = Number(d.radius);
