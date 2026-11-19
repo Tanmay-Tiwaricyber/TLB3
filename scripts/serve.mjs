@@ -2,7 +2,7 @@
 import http from 'node:http';
 import {readFile} from 'node:fs/promises';
 const root=new URL('../',import.meta.url),routes=new Set(['','login','welcome','overview','attendance','payroll','profile','team','reports','settings']);
-const mime={html:'text/html',js:'application/javascript',css:'text/css',svg:'image/svg+xml',woff2:'font/woff2',png:'image/png',webmanifest:'application/manifest+json'};
+const mime={html:'text/html',js:'application/javascript',css:'text/css',svg:'image/svg+xml',woff2:'font/woff2',png:'image/png',jpg:'image/jpeg',webmanifest:'application/manifest+json'};
 http.createServer(async(req,res)=>{try{
  let path=new URL(req.url,'http://localhost').pathname.slice(1);
  if(routes.has(path))path='index.html';
