@@ -45,3 +45,7 @@ npm test --prefix scripts
 ```
 
 Tests exercise the database rules with an offline interpreter and the provisioning flow with SDK stubs. They do not modify live Firebase accounts or data. After publishing the rules and client, verify sign-in, employee creation, one in-range check-in, a rejected out-of-range check-in, and a dated salary credit using dedicated test accounts.
+
+### Interface icons
+
+The portal and dashboards use [Lucide](https://lucide.dev/) via a small local SVG sprite (`assets/lucide.svg`). The Pulse wordmark and launch artwork remain custom. To change the icon set, edit the mapping in `scripts/build-icons.mjs`, then run `npm ci --prefix scripts` and `npm run icons --prefix scripts`. Commit the regenerated sprite and license alongside the change. Static hosting requires no build step or external icon service.
