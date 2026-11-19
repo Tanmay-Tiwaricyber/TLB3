@@ -3,7 +3,7 @@
   "description": "Trusted attendance and admin operations for TLB3 Pulse",
   "private": true,
   "engines": {
-    "node": "20"
+    "node": "22"
   },
   "main": "index.js",
   "scripts": {

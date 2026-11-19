@@ -56,7 +56,7 @@ exports.createEmployee = onCall(async request => {
   requireAdmin(request);
   const d = request.data || {};
   const employeeId = cleanId(d.employeeId);
-  if (!validId(employeeId)) fail('invalid-argument', 'Use a 3–24 character employee ID (letters, numbers, dash or underscore).');
+  if (employeeId === 'ADMIN' || !validId(employeeId)) fail('invalid-argument', 'Use a 3–24 character employee ID (letters, numbers, dash or underscore).');
   const name = requiredString(d.name, 'Name');
   const department = requiredString(d.department, 'Department');
   const jobTitle = requiredString(d.jobTitle || 'Team member', 'Job title');
@@ -139,16 +139,16 @@ exports.markAttendance = onCall(async request => {
   const profileSnap = await db.ref(`users/${user.uid}`).once('value');
   const profile = profileSnap.val();
   if (!profile || profile.role !== 'Employee' || profile.active !== true) fail('permission-denied', 'Active employee access is required.');
-  const lat = Number(request.data?.latitude), lng = Number(request.data?.longitude), accuracy = Number(request.data?.accuracy || 0);
+  const lat = request.data?.latitude, lng = request.data?.longitude, accuracy = request.data?.accuracy;
   if (!Number.isFinite(lat) || lat < -90 || lat > 90 || !Number.isFinite(lng) || lng < -180 || lng > 180) fail('invalid-argument', 'A valid device location is required.');
-  if (accuracy > 1000) fail('failed-precondition', 'Location accuracy is too low. Try again outdoors.');
+  if (!Number.isFinite(accuracy) || accuracy < 0 || accuracy > 1000) fail('failed-precondition', 'Location accuracy is too low. Try again outdoors.');
   const officeSnap = await db.ref('settings/office').once('value');
   const office = officeSnap.val();
   if (!office || !Number.isFinite(Number(office.lat)) || !Number.isFinite(Number(office.lng)) || !Number(office.radius)) fail('failed-precondition', 'Office location has not been configured by your administrator.');
-  const distance = Math.round(distanceMeters(lat, lng, Number(office.lat), Number(office.lng)));
-  if (distance > Number(office.radius)) fail('permission-denied', `Check-in blocked: device is ${distance}m outside the office geofence.`);
+  const distance = distanceMeters(lat, lng, Number(office.lat), Number(office.lng));
+  if (distance > Number(office.radius)) fail('permission-denied', `Check-in blocked: device is ${Math.round(distance)}m from the office, outside the allowed radius.`);
   const date = dayInIndia(), ref = db.ref(`attendance/${profile.employeeId}/${date}`), now = Date.now();
-  const result = await ref.transaction(current => current || {
+  const result = await ref.transaction(current => current ? undefined : {
     employeeId: profile.employeeId, date, status: 'Present', checkIn: timeInIndia(new Date(now)),
     office: office.name, distanceMeters: distance, locationAccuracyMeters: Math.round(accuracy), timestamp: now, source: 'device-gps'
   }, undefined, false);
@@ -189,13 +189,13 @@ exports.updateOfficeSettings = onCall(async request => {
   return { ok: true };
 });
 
-exports.closeAttendanceDay = onSchedule({ schedule: '59 23 * * *', timeZone: 'Asia/Kolkata' }, async () => {
-  const date = dayInIndia();
+exports.closeAttendanceDay = onSchedule({ schedule: '5 0 * * *', timeZone: 'Asia/Kolkata', retryCount: 3 }, async event => {
+  const date = dayInIndia(new Date(Date.parse(event.scheduleTime) - 86400000));
   const users = await db.ref('users').once('value');
   const tasks = [];
   users.forEach(child => {
     const p = child.val();
-    if (p && p.role === 'Employee' && p.active === true) {
+    if (p && p.role === 'Employee' && p.active === true && (!p.joinDate || p.joinDate <= date)) {
       const ref = db.ref(`attendance/${p.employeeId}/${date}`);
       tasks.push(ref.transaction(existing => existing || {
         employeeId: p.employeeId, date, status: 'Absent', checkIn: '', office: '', timestamp: Date.now(), source: 'automatic-close'

@@ -1,67 +1,45 @@
 # TLB3 Pulse
 
-Firebase-backed workforce management application: employee and admin sign-in, attendance, office geofencing, payroll history, employee management, reports, and workspace settings. Firebase web configuration is public client configuration; access control is enforced by Realtime Database rules and callable Cloud Functions, not by hiding the API key.
+A responsive workforce ERP with employee and administrator portals. The interface follows the FenxTek design system: warm paper, ink panels, violet controls, lime signal graphics, Inter Tight, Instrument Serif and JetBrains Mono. Fonts and Firebase web SDKs are served locally.
 
-## Firebase project
+## Preview
 
-The app is configured for project `chat-world-62138` and writes application data to Realtime Database. It does not store account passwords in the database: Firebase Authentication handles passwords.
+Run `node scripts/serve.mjs` and open `http://localhost:3000`. The sign-in page works without provisioning accounts; there is **no demo password or client-side admin bypass**. Browser GPS needs HTTPS (or localhost) and location permission.
 
-### One-time setup
+## Connect the live workspace
 
-1. In Firebase Console, enable **Authentication → Email/Password**, add your deployed app's host under **Authentication → Settings → Authorized domains**, and create/enable **Realtime Database** in the configured project.
-2. From this project directory, install the Firebase CLI and sign in:
+The web client targets Firebase project **chat-world-62138**. Its supplied public web configuration is already included. Configuring the web client does not deploy backend resources.
+
+1. Enable Email/Password in Firebase Authentication and create the configured Realtime Database. Add the app host to Firebase Authentication’s authorized domains.
+2. Install the Firebase CLI, authenticate with `firebase login`, then run `npm --prefix functions install` and `npm --prefix scripts install`. Scheduled Functions require billing, Cloud Scheduler and the relevant Google Cloud permissions.
+3. Deploy trusted operations and deny-by-default RTDB rules:
 
    ```sh
-   npm install -g firebase-tools
-   firebase login
-   firebase use chat-world-62138
-   npm --prefix functions install
-   npm --prefix scripts install
+   firebase deploy --project chat-world-62138 --only database,functions
    ```
 
-3. Create a service-account key in Firebase/GCP IAM for the one-time admin bootstrap. Keep it outside this repository. Bootstrap an admin (the default ID is `admin`; choose a strong password yourself):
+4. Provision the first admin from a trusted terminal. Keep the service-account JSON outside this repository and hosting directory. The command creates (or updates) the dedicated `admin@example.com` Firebase Auth identity, admin claim and RTDB profile. Reserve that email for this account.
 
    ```sh
    export GOOGLE_APPLICATION_CREDENTIALS=/secure/path/service-account.json
-   export ADMIN_PASSWORD='use-a-unique-strong-password'
-   # Optional: export ADMIN_USER_ID=admin ADMIN_NAME='Workspace Administrator'
-   # Optional: export ADMIN_EMAIL=admin@example.com to use that sign-in email
+   read -rs -p 'Choose an admin password (12+ characters): ' ADMIN_PASSWORD; echo
+   export ADMIN_PASSWORD
    node scripts/bootstrap-admin.mjs
+   unset ADMIN_PASSWORD
    ```
 
-   Sign-in accepts the user ID or Firebase Auth email and password. Employee IDs map internally to `{id}@tlb3pulse.com`; admins can set `ADMIN_EMAIL` (for example, `admin@example.com`) during bootstrap. Admin-panel access requires the server-provisioned admin claim and the configured admin email `admin@example.com`; email text alone does not grant access. Realtime Database rules and callable Functions both enforce this email/claim pair. The bootstrap script never prints the password.
+5. Host the web client on HTTPS (e.g. `firebase deploy --project chat-world-62138 --only hosting`). Static Vercel route rewrites are also included. Deploying just the frontend does **not** deploy the scheduled absence job or callable functions.
+6. Select **Admin**, sign in with user ID `admin`, then save the actual office name, latitude, longitude and allowed radius in **Settings**. Create employee IDs and temporary passwords in **Team**. Share credentials privately. Workers can change their passwords in Profile.
 
-4. Deploy the database rules, callable functions, and web app:
+## Daily use
 
-   ```sh
-   firebase deploy --only database,functions,hosting
-   ```
+- **Employee:** Use the Employee tab, ID and password. Choose **Verify location & check in** in Overview. The callable function verifies the active account and distance from the configured office before recording Present. Missing GPS permission, poor accuracy, missing office configuration and out-of-radius positions block check-in. Browser-reported GPS is not tamper-proof.
+- **Automatic absence:** At 00:05 Asia/Kolkata the scheduler closes the preceding date. Missing records for eligible active workers are marked Absent without replacing existing check-ins or admin corrections. Days without a finalized record are not presented as confirmed absences.
+- **Payroll:** Admins record salary credits with an employee, amount, status and credit date. Employees can read their own salary history. This is a payment ledger, not a bank transfer service.
+- **Administrator:** Create and edit worker profiles, reset passwords, disable/enable accounts, review and correct dated attendance, export a register, manage office policy and record salary credits.
 
-   Cloud Functions (including the scheduled daily attendance close) may require the Firebase/Google Cloud **Blaze** billing plan and Cloud Scheduler to be enabled. Add billing alerts before production use.
+## Data and access
 
-5. Sign in as `admin` with the password you set. Open **Settings** and save the actual office name, latitude, longitude, and geofence radius before workers attempt check-in. Then create employee accounts from **People**. Share each employee ID and temporary password securely; have employees change their password after first sign-in.
+Profiles (`/users/{uid}`), daily attendance (`/attendance/{employeeId}/{date}`), credits (`/payments/{employeeId}/{paymentId}`) and office policy (`/settings/office`) live in Realtime Database. Passwords stay in Firebase Authentication. The portal switch is presentation only: trusted writes require callable authorization or RTDB rules. Admin operations require a provisioned admin claim **and** the reserved admin email.
 
-## Data model (Realtime Database)
-
-- `/users/{uid}` — employee/admin profile and role (no passwords)
-- `/attendance/{employeeId}/{YYYY-MM-DD}` — check-in and final daily status
-- `/payments/{employeeId}/{paymentId}` — salary credit records
-- `/settings/office` — office coordinates and radius
-
-Browser clients read only the authenticated user's own profile, attendance, and payment history; admins require both the custom `admin` auth claim and `admin@example.com`. Employee/account, attendance, and payroll writes use callable Cloud Functions. The office settings node permits only validated writes from that claimed admin account under RTDB rules. Attendance geofencing is validated server-side and unmarked active-worker days are finalized as absent at 23:59 Asia/Kolkata. A browser GPS location is not cryptographic proof; review fraud, privacy, labor-law, and payroll requirements before production use.
-
-## Mobile app experience
-
-The app has a native Android wrapper in `android-app/` (Capacitor, package `com.tlb3.pulse`) with local bundled UI, native geolocation, About update-check action, and a WorkManager GitHub-release notification check roughly every six hours. A debug APK is available as `TLB3-Pulse-Android.apk`; it is debug-signed for personal installation, not Play Store release. Build and release-signing notes are in `android-app/README-ANDROID.md`. The updater requires a public GitHub repository/release and an APK attached to the release; Android still requires user confirmation to install. The responsive web version remains installable as a PWA from HTTPS. Firebase login and data access in the Android APK still require the Firebase setup described above.
-
-## Run the web client locally
-
-Firebase web SDKs load from the official Google CDN. Serve the files over HTTPS (required for browser geolocation outside localhost), for example with Firebase Hosting or a trusted local HTTPS server. Configure Firebase Auth, database rules, functions, and an initial admin account before signing in.
-
-## Files
-
-- `index.html` — responsive employee/admin web UI and Firebase client
-- `database.rules.json` — deny-by-default RTDB rules
-- `functions/index.js` — authenticated callable operations and scheduled absence finalizer
-- `scripts/bootstrap-admin.mjs` — one-time admin account bootstrap using service-account credentials
-- `firebase.json`, `.firebaserc` — deployment configuration
+Run `node --test scripts/attendance.test.cjs` to check the attendance handlers against an in-memory database stub. Production verification requires deployed rules, Functions and authorized employee/admin accounts.

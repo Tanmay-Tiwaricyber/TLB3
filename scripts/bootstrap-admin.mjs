@@ -4,7 +4,7 @@ import { getDatabase } from 'firebase-admin/database';
 
 const projectId = 'chat-world-62138';
 const databaseURL = 'https://chat-world-62138-default-rtdb.firebaseio.com';
-const employeeId = String(process.env.ADMIN_USER_ID || 'admin').trim().toUpperCase();
+const employeeId = 'ADMIN';
 const password = process.env.ADMIN_PASSWORD;
 const name = process.env.ADMIN_NAME || 'Workspace Administrator';
 if (!password || password.length < 12) throw new Error('Set ADMIN_PASSWORD to a strong value of at least 12 characters.');
@@ -13,7 +13,7 @@ if (!process.env.GOOGLE_APPLICATION_CREDENTIALS) throw new Error('Set GOOGLE_APP
 initializeApp({ credential: applicationDefault(), projectId, databaseURL });
 const auth = getAuth();
 const db = getDatabase();
-const email = String(process.env.ADMIN_EMAIL || `${employeeId.toLowerCase()}@tlb3pulse.com`).trim().toLowerCase();
+const email = 'admin@example.com';
 let user;
 try {
   user = await auth.getUserByEmail(email);

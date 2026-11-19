@@ -4,7 +4,7 @@
   },
   "functions": {
     "source": "functions",
-    "runtime": "nodejs20"
+    "runtime": "nodejs22"
   },
   "hosting": {
     "public": ".",
@@ -17,6 +17,44 @@
       "scripts/**",
       "README.md",
       "package-lock.json"
+    ],
+    "rewrites": [
+      {
+        "source": "/login",
+        "destination": "/index.html"
+      },
+      {
+        "source": "/welcome",
+        "destination": "/index.html"
+      },
+      {
+        "source": "/overview",
+        "destination": "/index.html"
+      },
+      {
+        "source": "/attendance",
+        "destination": "/index.html"
+      },
+      {
+        "source": "/team",
+        "destination": "/index.html"
+      },
+      {
+        "source": "/settings",
+        "destination": "/index.html"
+      },
+      {
+        "source": "/payroll",
+        "destination": "/index.html"
+      },
+      {
+        "source": "/reports",
+        "destination": "/index.html"
+      },
+      {
+        "source": "/profile",
+        "destination": "/index.html"
+      }
     ]
   }
 }
