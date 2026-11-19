@@ -126,3 +126,97 @@
   .profile-hero-right { flex: 1 0 100%; border-top: 1px solid var(--line); padding-top: 12px; text-align: left; }
   .shell .chart-bars { height: 145px; }
 }
+
+/* First paint: a physical pulse tile floating above a calibration grid. */
+.launch-screen {
+  --launch-lime: #daffa4;
+  display: grid; grid-template-rows: auto 1fr auto;
+  min-height: 100vh; min-height: 100svh;
+  padding: max(24px,env(safe-area-inset-top)) clamp(22px,5vw,80px) max(22px,env(safe-area-inset-bottom));
+  color: #f8f7f2; background-color: #17161e;
+  background-image: radial-gradient(ellipse at 50% 40%, #49395194, transparent 57%),linear-gradient(#e5d4ff08 1px,transparent 1px),linear-gradient(90deg,#e5d4ff08 1px,transparent 1px);
+  background-size: auto,40px 40px,40px 40px;
+}
+.launch-top,.launch-foot,.launch-wordmark { display:flex;align-items:center;justify-content:space-between;gap:8px }
+.launch-wordmark {font:650 24px/1 Tight,sans-serif;letter-spacing:-.055em;justify-content:flex-start;gap:3px}
+.launch-wordmark img {width:34px;height:34px;margin-right:5px;border:1px solid #ffffff24;border-radius:10px}
+.launch-wordmark em,.launch-center h1 em {font-family:Instrument,Georgia,serif;font-weight:400}
+.launch-wordmark em {font-size:30px}
+.launch-code,.launch-foot,.launch-eyebrow {font:10px/1.5 Jet,monospace;letter-spacing:.13em}
+.launch-code {color:#ccc8d2;border:1px solid #ffffff29;border-radius:999px;padding:6px 12px}
+.launch-center {align-self:center;text-align:center;padding:32px 0 42px}
+.launch-device {position:relative;width:148px;height:132px;margin:0 auto 22px;display:grid;place-items:center}
+.launch-device::before {content:'';position:absolute;inset:50% -8% 0;border:1px dashed #ac92d063;border-radius:50%}
+.launch-chip {width:86px;height:86px;display:grid;place-items:center;border-radius:25%;transform:rotate(-11deg) skewY(-3deg);background:linear-gradient(145deg,#716381,#332e41 78%);border:1px solid #c1abcc;box-shadow:0 4px #5c4f69,0 5px #a18eac,0 10px #453c51,0 11px #7f6e8d,0 24px 25px #09091080;animation:chip-breathe 3s ease-in-out infinite}
+.launch-chip svg {width:67%;stroke:var(--launch-lime);stroke-width:3;stroke-linejoin:round;stroke-linecap:round}
+.launch-eyebrow {color:var(--launch-lime)}
+.launch-center h1 {font:540 clamp(42px,5.5vw,84px)/1.04 Tight,sans-serif;letter-spacing:-.055em;margin:16px 0 12px;text-wrap:balance}
+.launch-center h1 em {color:var(--launch-lime);font-size:1.08em}
+.launch-center p {color:#c4beca;margin:0;font-size:14px}
+.launch-meter {width:min(180px,60%);height:3px;margin:24px auto 0;background:#ffffff24;border-radius:9px;overflow:hidden}
+.launch-meter i {display:block;width:45%;height:100%;border-radius:inherit;background:var(--launch-lime);animation:launch-scan 1.65s ease-in-out infinite alternate}
+.launch-foot {padding-top:14px;border-top:1px solid #ffffff24;color:#a8a2ae;font-size:9px}
+@keyframes launch-scan {to{transform:translateX(123%)}}
+@keyframes chip-breathe {50%{transform:translateY(-5px) rotate(-11deg) skewY(-3deg)}}
+@media(prefers-reduced-motion:reduce){.launch-chip,.launch-meter i{animation:none}}
+
+.guest-dock,.sheet-close {display:none}
+@media(max-width:860px){
+  :root {--dock-gap:max(10px,env(safe-area-inset-bottom));--dock-clear:calc(90px + var(--dock-gap));scroll-padding-bottom:var(--dock-clear)}
+  .access {padding-bottom:var(--dock-clear)}
+  .access .access-grid {grid-template-columns:minmax(0,1fr)}
+  .access .modules {grid-template-columns:1fr}
+  .access[data-section=portal] .module-section,.access[data-section=modules] .access-grid {display:none}
+  .access[data-section=modules] .module-section {margin-top:0}
+  .access[data-section=modules] .section-title h2 {font-size:clamp(24px,5vw,36px)}
+  .access .cover {min-height:185px}
+  .access .access-panel {min-width:0}
+  .access .access-footer {padding-bottom:8px}
+  .guest-dock, .shell .mobile-bottom-nav {
+    display:grid;position:fixed;inset:auto max(10px,env(safe-area-inset-right)) var(--dock-gap) max(10px,env(safe-area-inset-left));
+    justify-self:center;width:auto;max-width:580px;margin:auto;min-height:0;grid-template-columns:repeat(5,minmax(0,1fr));
+    padding:5px;gap:2px;z-index:15;border:1px solid #49474f;border-radius:17px;background:#222127;color:#f3f0e8;box-shadow:0 6px 18px #15121e30;
+  }
+  .guest-dock {grid-template-columns:repeat(3,minmax(0,1fr));max-width:430px}
+  .guest-dock button,.shell .mobile-tab {display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-width:0;min-height:48px;border:0;border-radius:11px;background:transparent;color:#dedbe3;font:500 11px/1.25 Tight,sans-serif}
+  .guest-dock button[aria-current],.shell .mobile-tab.active {background:#daf4b7;color:#1c2919}
+  .guest-dock button:focus-visible,.shell .mobile-tab:focus-visible {outline-color:#c9afff;outline-offset:0}
+  .shell .content {padding-bottom:var(--dock-clear)}
+  .shell .sidebar {inset:auto 0 0;width:100%;max-height:85dvh;overflow:auto;overscroll-behavior:contain;visibility:hidden;transform:translateY(101%);padding:24px 18px max(20px,env(safe-area-inset-bottom));border:1px solid var(--line);border-radius:20px 20px 0 0}
+  .shell .sidebar.open {visibility:visible;transform:none}
+  .shell .sidebar>.pulse-brand {margin-bottom:12px}
+  .sheet-close {display:grid;place-items:center;position:absolute;top:14px;right:14px;width:44px;height:44px;background:var(--surface-2);border:0;border-radius:50%;color:var(--ink)}
+  .shell .nav-item,.shell .theme-btn,.shell .mobile-profile {min-height:44px}
+  .shell .theme-btn,.shell .mobile-profile {min-width:44px}
+  body:has(.sidebar.open),body:has(.modal-backdrop) {overflow:hidden}
+  .modal {overscroll-behavior:contain;scroll-padding-bottom:16px}
+  .modal-actions {flex-wrap:wrap}.field,.field input,.field select,.form-grid-two>* {min-width:0}
+  .toast {bottom:var(--dock-clear)}
+  .content .main-grid,.content .profile-layout {grid-template-columns:minmax(0,1fr)}
+  .profile-identity,.profile-info-grid,.activity-item>div,.stat-num,.card-head>div,.profile-summary-row strong {min-width:0;overflow-wrap:anywhere}
+  .table-wrap td:before {font-size:10px;letter-spacing:.06em}
+  .day .tag {display:block;position:static;max-width:100%;overflow:hidden;text-overflow:ellipsis;font-size:9px}
+}
+@media(max-width:480px){
+  .launch-center h1 em {display:block}
+  .form-grid-two {grid-template-columns:minmax(0,1fr)}
+  .modal-actions .btn {min-height:44px}
+  .shell .stat-top {align-items:flex-start}
+  .shell .stat-icon {width:27px;height:27px}
+}
+@media(max-width:860px) and (max-height:480px){
+  .launch-device {width:80px;height:70px;margin-bottom:8px}.launch-chip{width:48px;height:48px}.launch-center{padding:12px 0}.launch-center h1{font-size:32px;margin:8px}.launch-meter{margin-top:10px}
+}
+@media(max-width:860px){
+  .guest-dock,.shell .mobile-bottom-nav {justify-self:auto;width:calc(100% - max(10px,env(safe-area-inset-left)) - max(10px,env(safe-area-inset-right)))}
+  .shell .topbar {height:calc(58px + env(safe-area-inset-top));padding-top:env(safe-area-inset-top)}
+  .access-header {padding-top:env(safe-area-inset-top)}
+  .shell .crumb {display:flex;align-items:center;gap:9px}
+  .shell .crumb::before {content:'';width:29px;height:29px;background:url('/assets/brand.svg') center/contain no-repeat}
+  .shell .main,.access-main {min-width:0}
+}
+@media(min-width:701px) and (max-width:860px){
+  .access .access-grid {grid-template-columns:minmax(0,.92fr) minmax(0,1.08fr)}
+  .access .access-panel,.access .cover {padding:24px}
+  .access .cover h1 {font-size:clamp(54px,7.8vw,70px)}
+}
