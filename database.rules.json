@@ -3,38 +3,90 @@
     ".read": false,
     ".write": false,
     "users": {
-      ".read": "auth != null && (auth.token.admin === true && auth.token.email === 'admin@example.com')",
+      ".read": "(auth != null && root.child('users').child(auth.uid).child('active').val() === true && root.child('users').child(auth.uid).child('role').val() === 'Admin')",
       ".indexOn": [
         "employeeId"
       ],
       "$uid": {
-        ".read": "auth != null && (auth.uid === $uid || (auth.token.admin === true && auth.token.email === 'admin@example.com'))",
-        ".write": false
+        ".read": "auth != null && auth.uid === $uid && data.child('active').val() === true",
+        ".write": "(auth != null && root.child('users').child(auth.uid).child('active').val() === true && root.child('users').child(auth.uid).child('role').val() === 'Admin')",
+        ".validate": "newData.hasChildren(['name','active','employeeId','role']) && newData.child('active').isBoolean() && newData.child('employeeId').isString() && newData.child('employeeId').val().matches(/^[A-Z0-9_-]{3,24}$/) && (newData.child('role').val() === 'Admin' || newData.child('role').val() === 'Employee')",
+        "name": {
+          ".write": "auth != null && root.child('users').child(auth.uid).child('active').val() === true && auth.uid === $uid && newData.isString()",
+          ".validate": "newData.isString() && newData.val().length <= 160 && newData.val().length > 0"
+        },
+        "city": {
+          ".write": "auth != null && root.child('users').child(auth.uid).child('active').val() === true && auth.uid === $uid && newData.isString()",
+          ".validate": "newData.isString() && newData.val().length <= 160"
+        },
+        "email": {
+          ".write": "auth != null && root.child('users').child(auth.uid).child('active').val() === true && auth.uid === $uid && newData.isString()",
+          ".validate": "newData.isString() && newData.val().length <= 160"
+        },
+        "emergency": {
+          ".write": "auth != null && root.child('users').child(auth.uid).child('active').val() === true && auth.uid === $uid && newData.isString()",
+          ".validate": "newData.isString() && newData.val().length <= 160"
+        },
+        "phone": {
+          ".write": "auth != null && root.child('users').child(auth.uid).child('active').val() === true && auth.uid === $uid && newData.isString()",
+          ".validate": "newData.isString() && newData.val().length <= 160"
+        },
+        "active": {
+          ".read": "auth != null && auth.uid === $uid"
+        }
+      }
+    },
+    "employeeIds": {
+      "$employeeId": {
+        ".write": "(auth != null && root.child('users').child(auth.uid).child('active').val() === true && root.child('users').child(auth.uid).child('role').val() === 'Admin') && !data.exists()",
+        ".validate": "newData.isString()"
       }
     },
     "attendance": {
-      ".read": "auth != null && (auth.token.admin === true && auth.token.email === 'admin@example.com')",
+      ".read": "(auth != null && root.child('users').child(auth.uid).child('active').val() === true && root.child('users').child(auth.uid).child('role').val() === 'Admin')",
       "$employeeId": {
-        ".read": "auth != null && ((auth.token.admin === true && auth.token.email === 'admin@example.com') || (root.child('users').child(auth.uid).child('active').val() === true && root.child('users').child(auth.uid).child('employeeId').val() === $employeeId))",
-        ".write": false,
+        ".read": "(auth != null && root.child('users').child(auth.uid).child('active').val() === true && root.child('users').child(auth.uid).child('role').val() === 'Admin') || (auth != null && root.child('users').child(auth.uid).child('active').val() === true && root.child('users').child(auth.uid).child('role').val() === 'Employee' && root.child('users').child(auth.uid).child('employeeId').val() === $employeeId)",
         "$date": {
-          ".read": "auth != null && ((auth.token.admin === true && auth.token.email === 'admin@example.com') || (root.child('users').child(auth.uid).child('active').val() === true && root.child('users').child(auth.uid).child('employeeId').val() === $employeeId))",
-          ".write": false
+          ".write": "(auth != null && root.child('users').child(auth.uid).child('active').val() === true && root.child('users').child(auth.uid).child('role').val() === 'Admin') || ((auth != null && root.child('users').child(auth.uid).child('active').val() === true && root.child('users').child(auth.uid).child('role').val() === 'Employee' && root.child('users').child(auth.uid).child('employeeId').val() === $employeeId) && !data.exists() && newData.hasChildren(['day','status','latitude','longitude','accuracy','timestamp']) && newData.child('status').val() === 'Present' && newData.child('timestamp').val() === now && newData.child('day').isNumber() && newData.child('day').val() % 1 === 0 && $date === newData.child('day').val() + '' && newData.child('day').val() * 86400000 <= now + 19800000 && (newData.child('day').val() + 1) * 86400000 > now + 19800000 && newData.child('accuracy').isNumber() && newData.child('accuracy').val() >= 0 && newData.child('accuracy').val() <= 1000 && newData.child('latitude').isNumber() && newData.child('latitude').val() >= -90 && newData.child('latitude').val() <= 90 && newData.child('longitude').isNumber() && newData.child('longitude').val() >= -180 && newData.child('longitude').val() <= 180 && root.child('settings').child('office').child('lngScale').isNumber() && root.child('settings').child('office').child('lngScale').val() >= 1 && root.child('settings').child('office').child('radius').isNumber() && ((newData.child('latitude').val() - root.child('settings').child('office').child('lat').val()) * 111195) * ((newData.child('latitude').val() - root.child('settings').child('office').child('lat').val()) * 111195) + ((newData.child('longitude').val() - root.child('settings').child('office').child('lng').val()) * root.child('settings').child('office').child('lngScale').val()) * ((newData.child('longitude').val() - root.child('settings').child('office').child('lng').val()) * root.child('settings').child('office').child('lngScale').val()) <= root.child('settings').child('office').child('radius').val() * root.child('settings').child('office').child('radius').val())",
+          "day": {
+            ".validate": true
+          },
+          "timestamp": {
+            ".validate": true
+          },
+          "latitude": {
+            ".validate": true
+          },
+          "longitude": {
+            ".validate": true
+          },
+          "accuracy": {
+            ".validate": true
+          },
+          "status": {
+            ".validate": true
+          },
+          "$other": {
+            ".validate": "(auth != null && root.child('users').child(auth.uid).child('active').val() === true && root.child('users').child(auth.uid).child('role').val() === 'Admin')"
+          }
         }
       }
     },
     "payments": {
-      ".read": "auth != null && (auth.token.admin === true && auth.token.email === 'admin@example.com')",
+      ".read": "(auth != null && root.child('users').child(auth.uid).child('active').val() === true && root.child('users').child(auth.uid).child('role').val() === 'Admin')",
       "$employeeId": {
-        ".read": "auth != null && ((auth.token.admin === true && auth.token.email === 'admin@example.com') || (root.child('users').child(auth.uid).child('active').val() === true && root.child('users').child(auth.uid).child('employeeId').val() === $employeeId))",
-        ".write": false
+        ".read": "(auth != null && root.child('users').child(auth.uid).child('active').val() === true && root.child('users').child(auth.uid).child('role').val() === 'Admin') || (auth != null && root.child('users').child(auth.uid).child('active').val() === true && root.child('users').child(auth.uid).child('role').val() === 'Employee' && root.child('users').child(auth.uid).child('employeeId').val() === $employeeId)",
+        "$payment": {
+          ".write": "(auth != null && root.child('users').child(auth.uid).child('active').val() === true && root.child('users').child(auth.uid).child('role').val() === 'Admin')",
+          ".validate": "newData.hasChildren(['employeeId','date','amount','status','recordedBy']) && newData.child('employeeId').val() === $employeeId && newData.child('recordedBy').val() === auth.uid && newData.child('amount').isNumber() && newData.child('amount').val() > 0 && newData.child('date').isString() && newData.child('date').val().matches(/^\\d{4}-\\d{2}-\\d{2}$/) && (newData.child('status').val() === 'Credited' || newData.child('status').val() === 'Processing')"
+        }
       }
     },
     "settings": {
       "office": {
         ".read": "auth != null && root.child('users').child(auth.uid).child('active').val() === true",
-        ".write": "auth != null && auth.token.admin === true && auth.token.email === 'admin@example.com'",
-        ".validate": "newData.hasChildren(['name','lat','lng','radius','updatedAt','updatedBy']) && newData.child('name').isString() && newData.child('name').val().length > 0 && newData.child('name').val().length <= 120 && newData.child('lat').isNumber() && newData.child('lat').val() >= -90 && newData.child('lat').val() <= 90 && newData.child('lng').isNumber() && newData.child('lng').val() >= -180 && newData.child('lng').val() <= 180 && newData.child('radius').isNumber() && newData.child('radius').val() >= 10 && newData.child('radius').val() <= 5000 && newData.child('updatedAt').isNumber() && newData.child('updatedBy').val() === auth.uid"
+        ".write": "(auth != null && root.child('users').child(auth.uid).child('active').val() === true && root.child('users').child(auth.uid).child('role').val() === 'Admin')",
+        ".validate": "newData.hasChildren(['name','lat','lng','radius','updatedAt','updatedBy']) && newData.child('name').isString() && newData.child('name').val().length > 0 && newData.child('name').val().length <= 120 && newData.child('lat').isNumber() && newData.child('lat').val() >= -90 && newData.child('lat').val() <= 90 && newData.child('lng').isNumber() && newData.child('lng').val() >= -180 && newData.child('lng').val() <= 180 && newData.child('radius').isNumber() && newData.child('radius').val() >= 10 && newData.child('radius').val() <= 5000 && newData.child('updatedAt').isNumber() && newData.child('updatedBy').val() === auth.uid && newData.child('lngScale').isNumber() && newData.child('lngScale').val() >= 1 && newData.child('lngScale').val() <= 111195"
       }
     }
   }
