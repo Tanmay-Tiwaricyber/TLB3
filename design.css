@@ -57,7 +57,7 @@
 .quick-actions .activity-bullet { color: var(--module-ink); background: var(--module-tint); }
 .quick-actions strong { font-size: 13px; }
 .quick-actions a::after { content: ''; position: absolute; inset: 0; border-radius: inherit; }
-.quick-actions .activity-item::after { content: '›'; margin-left: auto; color: var(--muted); font-size: 18px; }
+.quick-actions .activity-item > .lucide-icon { margin-left: auto; color: var(--muted); pointer-events: none; }
 .shell .chart-bars {
   margin: 12px 0 26px;
   gap: clamp(2px, .5vw, 8px);

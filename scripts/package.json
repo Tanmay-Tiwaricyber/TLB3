@@ -1,6 +1,12 @@
 {
   "name": "tlb3-workspace-tests",
   "private": true,
-  "scripts": {"test": "node --test *.test.cjs"},
-  "devDependencies": {"targaryen": "3.1.0"}
+  "scripts": {
+    "test": "node --test *.test.cjs",
+    "icons": "node build-icons.mjs"
+  },
+  "devDependencies": {
+    "lucide-static": "0.468.0",
+    "targaryen": "3.1.0"
+  }
 }
